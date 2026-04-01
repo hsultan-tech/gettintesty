@@ -1,0 +1,177 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 13 13 13;
+  --foreground: 245 245 245;
+  --accent-gold: 201 169 98;
+  --accent-muted: 51 51 51;
+  --node-border: 51 51 51;
+  --node-bg: 26 26 26;
+  --node-hover: 37 37 37;
+
+  --grid-line: rgba(255, 255, 255, 0.04);
+  --grid-stroke: rgba(255, 255, 255, 0.02);
+  --corner-stroke: rgba(255, 255, 255, 0.1);
+  --bg-solid: #0D0D0D;
+  --scrollbar-thumb-hover: #444444;
+}
+
+.light {
+  --background: 246 244 239;
+  --foreground: 28 28 28;
+  --accent-gold: 184 137 58;
+  --accent-muted: 220 213 198;
+  --node-border: 210 202 186;
+  --node-bg: 255 255 255;
+  --node-hover: 248 246 241;
+
+  --grid-line: rgba(0, 0, 0, 0.055);
+  --grid-stroke: rgba(0, 0, 0, 0.025);
+  --corner-stroke: rgba(0, 0, 0, 0.1);
+  --bg-solid: #F6F4EF;
+  --scrollbar-thumb-hover: #b0a898;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  background-color: var(--bg-solid);
+  color: rgb(var(--foreground));
+  font-family: 'Manrope', sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.grid-background {
+  background-image: 
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-position: center center;
+}
+
+.grid-background-animated {
+  background-image: 
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: gridMove 20s linear infinite;
+}
+
+@keyframes gridMove {
+  0% {
+    background-position: 0 0, 0 0;
+  }
+  100% {
+    background-position: 60px 60px, 60px 60px;
+  }
+}
+
+.react-flow__background {
+  background-color: var(--bg-solid) !important;
+  transition: background-color 0.3s ease;
+}
+
+.react-flow__edge-path {
+  stroke: rgb(var(--accent-muted)) !important;
+  stroke-width: 2;
+}
+
+.react-flow__edge.animated path {
+  stroke-dasharray: 5;
+  animation: dashdraw 0.5s linear infinite;
+}
+
+@keyframes dashdraw {
+  from {
+    stroke-dashoffset: 10;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.react-flow__controls {
+  background: rgb(var(--node-bg)) !important;
+  border: 1px solid rgb(var(--node-border)) !important;
+  border-radius: 8px !important;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.react-flow__controls-button {
+  background: rgb(var(--node-bg)) !important;
+  border-bottom: 1px solid rgb(var(--node-border)) !important;
+  fill: rgb(var(--foreground)) !important;
+  transition: background 0.2s ease;
+}
+
+.react-flow__controls-button:hover {
+  background: rgb(var(--node-hover)) !important;
+}
+
+.react-flow__minimap {
+  background: rgb(var(--node-bg)) !important;
+  border: 1px solid rgb(var(--node-border)) !important;
+  border-radius: 8px !important;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-solid);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--accent-muted));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+::selection {
+  background-color: rgb(var(--accent-gold) / 0.3);
+  color: rgb(var(--foreground));
+}
+
+:focus-visible {
+  outline: 2px solid rgb(var(--accent-gold));
+  outline-offset: 2px;
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, rgb(var(--foreground)) 0%, rgb(var(--foreground) / 0.55) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.glow-gold {
+  box-shadow: 0 0 20px rgb(var(--accent-gold) / 0.3);
+}
+
+.glow-subtle {
+  box-shadow: 0 0 30px rgb(var(--foreground) / 0.05);
+}
+
+.flow-node {
+  transition: all 0.2s ease;
+}
+
+.flow-node:hover {
+  transform: translateY(-2px);
+}

@@ -1,0 +1,317 @@
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---- User message ---- */
+.chat-message.user {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+  animation: slideIn 0.25s ease-out;
+}
+
+.user-bubble {
+  background: linear-gradient(90deg, rgba(204, 209, 225, 0.16) -25.34%, rgba(157, 164, 185, 0.16) 100%);
+  transition: background 0.2s;
+  color: var(--color-text-primary);
+  padding: 12px 16px;
+  border-radius: 18px 18px 4px 18px;
+  max-width: 68%;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  word-wrap: break-word;
+}
+
+.user-bubble p {
+  margin: 0;
+}
+
+/* ---- Assistant message ---- */
+.chat-message.assistant {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+  animation: slideIn 0.25s ease-out;
+  max-width: 78%;
+}
+
+[data-theme="dark"] .user-bubble {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.07) -25.34%, rgba(255, 255, 255, 0.04) 100%);
+}
+
+.assistant-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0px;
+  margin-bottom: 2px;
+}
+
+.assistant-avatar-img {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  flex-shrink: 0;
+  display: block;
+}
+
+.assistant-name {
+  font-size: 15px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: var(--line-height-tight);
+}
+
+.assistant-timing-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 10px;
+}
+
+.assistant-timing-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: var(--color-text-tertiary);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.assistant-timing {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  font-weight: var(--font-weight-normal);
+}
+
+.shimmer-text {
+  color: var(--color-text-tertiary);
+  background: linear-gradient(
+    90deg,
+    var(--color-text-tertiary) 0%,
+    var(--color-text-tertiary) 35%,
+    rgba(220, 220, 228, 0.95) 48%,
+    #ffffff 50%,
+    rgba(220, 220, 228, 0.95) 52%,
+    var(--color-text-tertiary) 65%,
+    var(--color-text-tertiary) 100%
+  );
+  background-size: 250% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 2.5s linear infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.assistant-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.loading-dots-container {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 0 0 0 44px;
+  overflow: hidden;
+}
+
+.curiosity-gradient {
+  background: linear-gradient(267.04deg, #FF797F 6.3%, #EC111A 97.54%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.assistant-bubble {
+  padding-left: 44px;
+}
+
+.message-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.message-content p {
+  margin: 0;
+  line-height: var(--line-height-relaxed);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  word-wrap: break-word;
+}
+
+.message-content strong {
+  font-weight: var(--font-weight-bold);
+}
+
+.message-content em {
+  font-style: italic;
+}
+
+.message-content code {
+  background-color: #F4F4F6;
+  padding: 0.125rem 0.25rem;
+  border-radius: 3px;
+  font-family: var(--font-family-mono);
+  font-size: 0.9em;
+}
+
+.message-content ul,
+.message-content ol {
+  margin: 0.4rem 0;
+  padding-left: 1.4rem;
+}
+
+.message-content li {
+  margin: 0.2rem 0;
+  line-height: var(--line-height-relaxed);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+}
+
+.message-content h1,
+.message-content h2,
+.message-content h3 {
+  margin: 0.5rem 0 0.25rem;
+  color: var(--color-text-primary);
+}
+
+.message-image {
+  margin-top: 8px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--color-border);
+}
+
+.message-image img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ---- Action buttons below assistant message ---- */
+.message-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+  padding-left: 44px;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-family: var(--font-family-base);
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.action-btn:hover {
+  background-color: var(--color-bg);
+  border-color: var(--color-text-tertiary);
+}
+
+.action-btn--copied {
+  background-color: #F0FDF4;
+  border-color: #86EFAC;
+  color: #16A34A;
+}
+
+.action-btn--copied:hover {
+  background-color: #DCFCE7;
+  border-color: #4ADE80;
+}
+
+.action-btn--loading {
+  opacity: 0.65;
+  cursor: default;
+}
+
+.action-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ---- Flowtia inline iframe ---- */
+.flowtia-inline {
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  margin-top: 8px;
+  margin-left: 44px;
+}
+
+.flowtia-inline__toolbar {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+  gap: 6px;
+}
+
+.flowtia-inline__label {
+  flex: 1;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.flowtia-inline__btn {
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.flowtia-inline__btn:hover {
+  background: var(--color-primary);
+  color: #ffffff;
+  border-color: var(--color-primary);
+}
+
+.flowtia-inline__iframe {
+  border: none;
+  width: 100%;
+  height: 340px;
+}

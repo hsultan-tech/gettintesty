@@ -1,0 +1,34 @@
+==Release notes_Scotia==
+
+Compiler of release notes: Dalton Maag
+Designer: Dalton Maag
+Designer URL: daltonmaag.com
+
+Date of creation: 2019-05-31
+
+Changes since previous release:
+- Extended character set to All European Latin.
+- Added Italic and Legal styles.
+
+Basic information
+1 Basic Family name: Scotia
+2 TrueType Version record: 1.100
+3 Regional package: Latin
+4 Supported scripts: Latin
+5 Number of glyphs: 509
+6 Weights/Styles: Light, Light Italic, Regular, Italic, Bold, Bold Italic, Headline, Legal
+7 Usage: Text and Display
+
+Technology
+1 The files have been delivered in the TrueType-based OpenType format, for use in all major Operating Systems, and also as TTF for use in apps, and in web font format: WOFF; WOFF2.
+2 Embedding settings: Everything is allowed (installable mode); subsetting is allowed.
+3 Hinting information: All glyphs are manually hinted for optimized rasterization in Microsoft ClearType or for other LCD devices.
+4 Default numerals: Proportional. Tabular figures are accessible through OpenType Features.
+
+Other Information
+The following logos are accessible through the Contextual Alternates (calt) feature, by typing the corresponding sequence (case-sensitive):
+    To access the Scotiabank Logo: ScotiabankLogo
+    To access the Scotia Logo: ScotiaLogo
+    To access the Flying S: FlyingSLogo
+    To access the Banque Scotia Logo: BanqueScotiaLogo
+    To access the Corporate Logo: CorporateLogo

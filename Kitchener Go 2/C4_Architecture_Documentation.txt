@@ -1,0 +1,226 @@
+SCOTIABANK WEALTH MANAGEMENT - ARCHITECTURE DOCUMENTATION
+
+Overview
+
+This documentation describes the complete wealth management ecosystem at Scotiabank. The system includes client onboarding across multiple channels (iTrade, McLeod, PIC), digital platforms (NEO, ORION, Starburst), trading infrastructure (Wealth OMS, Charles River), settlement systems, and compliance processing.
+
+The architecture uses a multi-level C4 model with 16 views total: 1 Context view, 5 Container views, and 10 Component views. You can navigate by clicking nodes to drill down into deeper levels.
+
+
+SYSTEM COMPONENTS
+
+The wealth management system consists of seven main areas:
+
+1. Client
+The end user who initiates onboarding, provides information, signs documents, places trades, and manages their portfolio. Can be an individual or joint account holder. Canadian residency is required for iTrade.
+
+2. Onboarding System
+Multi-channel platform that routes clients to appropriate channels (iTrade, McLeod, PIC), captures data, and manages workflows. Uses ICON and WealthOne technologies.
+
+3. Client Experience
+Digital platforms that clients use for daily interactions. NEO provides wealth management interface, ORION handles banking operations, and Starburst offers mobile trading. Prodigy orchestrates backend services while Marvel provides API integration.
+
+4. Trading and Settlement
+Order execution and settlement infrastructure. Wealth OMS handles order routing, Charles River serves advisor workflows, INTACT manages settlement submissions, and Broadridge processes final settlement through CDS.
+
+5. Books of Record
+Data storage systems. KYC stores client profiles, Broadridge 061 stores account details, Party Master handles PIC clients, and Empower manages PIC custody records.
+
+6. Compliance and AML
+Risk validation and compliance processing. Runs batch processing overnight, performs AML checks, validates identities through credit bureaus, and flags high-risk accounts through HRFA.
+
+7. Operations Teams
+Manual review and approval teams. iTrade Operations handles account approvals and document review. Wealth Client Onboarding manages McLeod processes. Both teams handle NIGO (Not In Good Order) remediation.
+
+
+ONBOARDING CHANNELS
+
+iTrade (Self-Directed)
+Self-directed investing channel using ICON for data input. Canadian residents only, with W-9 required for US citizens. Supports individual or joint accounts. Registered accounts are individual only, non-registered can be joint. Includes options knowledge assessment and TransUnion credit check.
+
+McLeod (Advisory)
+Advisory channel with risk tolerance assessment and portfolio recommendations. No credit check required. Supports both discretionary and non-discretionary accounts. Uses separate McLeod WealthOne system built on Pega.
+
+PIC / SJF
+Institutional client channel. Allows US clients and external custody options. Uses Party Master and Empower systems instead of KYC and Broadridge. Separate workflow from retail channels.
+
+MD Financial
+Dedicated channel for doctors with corporate account support. Completely separate system architecture.
+
+Private Banking
+For high net worth clients with complex lending needs, large loans, and collateral requirements.
+
+Scotia Trust
+Custody-focused service acting as executor and estate manager. Holds assets without providing day-to-day investment advice.
+
+
+CLIENT EXPERIENCE PLATFORMS
+
+NEO (Wealth UI)
+React-based web application for wealth management. Provides portfolio overview, goal tracking, and wealth-specific features. Integrates with Prodigy Service for backend operations.
+
+Starburst (iTrade Mobile)
+Mobile application for iTrade clients. Offers mobile trading, quick order entry, and portfolio monitoring on the go.
+
+ORION (Banking UI)
+Banking consolidated view providing money movement and retail banking integration. Routes operations through Marvel API.
+
+Marvel
+API microservice layer acting as gateway for ORION. Handles account queries, money movement APIs, and backend services for Prodigy.
+
+Prodigy Service
+Central orchestration layer that coordinates between NEO, Marvel, and backend services.
+
+
+TRADING CHANNELS
+
+iTrade Digital Channels
+Includes Scotia Online Brokerage (web), NEO trading interface, iTrade Mobile app, and TradePro platform. All channels route orders through OMS Web Services to the central Wealth OMS.
+
+Charles River (SM Advisory)
+Platform for advisors and traders. Charles Anywhere provides the interface for portfolio management and order entry. Uses FIX protocol to communicate with Wealth OMS. Designed for institutional and advisory workflows.
+
+Contact Centre
+SCORE system for assisted order entry. Supports OM Desk operations and manual order processing for clients who need help.
+
+Wealth OMS
+Central order management system. Receives orders from all channels (digital via REST API, Charles River via FIX protocol). Handles order validation, risk checks, routing logic, and maintains the order book. Routes to markets through venue-specific gateways.
+
+Settlement Processing
+End of day and start of day batch processing. INTACT gateway formats and submits trades. INTACT MQ ensures delivery. Broadridge BPS processes settlements. CDS finalizes settlement and provides reconciliation data.
+
+
+ORDER FLOW
+
+iTrade Path:
+Digital platforms send orders to API layer, which forwards to OMS Web Services. OMS Core processes orders, writes to Order Book, and routes through OMS Gateways to markets.
+
+Charles River Path:
+Charles Anywhere sends orders to CR Middle Tier, which updates CR IMS and writes to CR Order Book. CR FIX Engine converts to FIX protocol and sends to OMS FIX Server. Orders then flow to OMS Core for execution.
+
+Both paths converge at OMS Core for unified execution.
+
+Market Venues:
+Mutual funds route through DataPhile to FundServ. Bonds go through Perimeter Markets/CIB to bond dealers. Equities route through IRESS to TSX, NYSE, and NASDAQ.
+
+
+SETTLEMENT AND RECONCILIATION
+
+Trade Export:
+Wealth OMS exports iTrade trades. Charles River exports advisor trades. Both feed into EOD/SOD processing.
+
+Settlement Submission:
+EOD/SOD processing aggregates trades and submits through INTACT Gateway. INTACT MQ queues messages for delivery. Broadridge BPS processes settlements. CDS finalizes settlement and moves securities.
+
+Reconciliation:
+CDS generates reconciliation data. Break detection identifies mismatches. Enhanced Recon Report delivers early morning. Balance Report follows later in the morning. Sec Ops team reviews and resolves breaks.
+
+Data Processing:
+Parallel to settlement, trade data flows through Scotia Online for compression. Trade Compression reduces duplicates and optimizes for CDS. CDS Recon processes prepare for matching and balance calculations.
+
+
+DATA STORES
+
+Client Books:
+KYC database stores iTrade and McLeod client profiles. Supports prefill for returning clients. Manages consent to share with CIS (retail banking). Party Master handles PIC client information separately.
+
+Account Books:
+Broadridge 061 stores iTrade and McLeod account records and holdings. Feeds to AML batch processing. Empower stores PIC accounts and custody records with optional external custody.
+
+Banking Integration:
+CIS contains retail banking information. Banking Info DB stores funding details separately from KYC. Data sharing requires client consent.
+
+
+COMPLIANCE AND AML
+
+Overnight Batch:
+End of day processing pulls data from Broadridge and Empower. Feeds to AML team and identity verification.
+
+AML Compliance:
+Screens client names, validates source of funds, and assesses risk levels (low, medium, high). Flags suspicious patterns through HRFA.
+
+Identity Verification:
+Validates ID documents. Performs credit bureau checks for iTrade (not McLeod). Validates addresses and credit history.
+
+HRFA Risk Flags:
+Detects inconsistencies like unemployed status with high income. Triggers requirement for explanation and proof. Flags accounts with no credit history or unusually long credit history for alternate eligibility verification.
+
+Clearance Decision:
+Cleared accounts become active. Failed accounts require remediation and outbound contact.
+
+
+OPERATIONS TEAMS
+
+iTrade Operations:
+Backend users who approve accounts and review documents. Separate roles for account approval, document review, and options approval. Outbound users contact clients for clarifications but do not approve accounts.
+
+Wealth Client Onboarding:
+Handles McLeod processes. Checks agreements, validates IDs, and makes corrections to Broadridge. Some processes are shared with iTrade.
+
+NIGO Remediation:
+Handles "Not In Good Order" cases where information is missing, invalid, or inconsistent. Outbound contact for clarification. Cases loop back for reprocessing.
+
+
+KEY DIFFERENCES
+
+iTrade vs McLeod:
+iTrade requires TransUnion credit check, uses ICON for data entry, and is self-directed. McLeod has no credit check, includes risk tolerance assessment, and is advisory-focused.
+
+Account Types:
+Registered accounts are individual only. Non-registered accounts can be individual or joint. Joint registered accounts are not allowed.
+
+PIC Differences:
+Allows US clients. Supports external custody. Uses Party Master and Empower instead of KYC and Broadridge. Focused on institutional clients.
+
+Validation Differences:
+iTrade performs credit bureau checks, residency verification, and requires W-9 for US citizens. McLeod skips credit checks but adds risk tolerance and portfolio matching. PIC allows US clients and external custody arrangements.
+
+
+NEO ONBOARDING FLOW
+
+When clients first access NEO, they go through:
+Login and authentication
+Agreement acceptance
+Email update and verification
+Access code setup
+Quote package selection (real-time vs delayed)
+Exchange agreements (NASDAQ, NYSE, OPRA, Canadian exchanges)
+Success confirmation and dashboard access
+
+
+TECHNICAL DETAILS
+
+Connection Handles:
+All nodes support connections from four directions (top, bottom, left, right). Horizontal flows use left-right handles. Vertical flows use top-bottom handles. React Flow automatically routes based on handle specifications.
+
+Edge Types:
+Smoothstep edges create curved connections. Animated edges indicate primary or critical paths. Source and target handles are explicitly specified for clean routing.
+
+Technology Stack:
+Frontend built with Next.js 15 and React 19 using TypeScript. Visualization uses ReactFlow with custom node types. Styling via Tailwind CSS with Framer Motion animations. Architecture follows C4 model with multi-level drill-down.
+
+
+COMPLETE FLOW SUMMARY
+
+Client Onboarding:
+Client selects channel (iTrade, McLeod, or PIC). WealthOne orchestrates workflow through Pega. Operations review and approve. Data writes to books of record (KYC, Broadridge, Party Master, or Empower). Overnight batch feeds to compliance and AML. Account activates after clearance.
+
+Client Experience:
+Client uses digital platform (NEO, ORION, or Starburst). Backend services (Prodigy and Marvel) coordinate operations. Clients manage accounts and place trades.
+
+Order Execution:
+Client places order through trading channel (digital, advisor, or assisted). Order management system (OMS or Charles River) processes and routes. Order executes at market venue. Execution confirms back to client.
+
+Settlement and Reconciliation:
+Executed trades export to EOD/SOD processing. Settlement systems (INTACT and Broadridge) process submissions. CDS finalizes settlement. Reconciliation runs and reports to Sec Ops. Operations team resolves breaks.
+
+Data Persistence:
+All systems write to appropriate books of record. Compliance processing validates data. Operations teams review exceptions. Client records update continuously.
+
+
+APPLICATION ACCESS
+
+Run the visualization at http://localhost:3000
+Repository at https://github.com/hsultan-tech/Kitchener-Go.git
+
+Click nodes with drill-down indicators to explore deeper levels. Use browser back button to return. Hover over nodes for details. Animated edges show primary data flows.

@@ -1,0 +1,77 @@
+.flow-panel {
+  position: fixed;
+  width: 640px;
+  height: 480px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 1000;
+  resize: both;
+}
+
+.flow-panel--fullscreen {
+  position: fixed;
+  inset: 0;
+  width: 100vw !important;
+  height: 100vh !important;
+  border-radius: 0;
+  resize: none;
+}
+
+.flow-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #F4F4F6;
+  border-bottom: 1px solid #e2e8f0;
+  cursor: grab;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.flow-panel--fullscreen .flow-panel__header {
+  cursor: default;
+}
+
+.flow-panel__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  font-family: var(--font-family-base);
+}
+
+.flow-panel__actions {
+  display: flex;
+  gap: 4px;
+}
+
+.flow-panel__btn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #6B7280;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.flow-panel__btn:hover {
+  background: #EC111A;
+  border-color: #EC111A;
+  color: #ffffff;
+}
+
+.flow-panel__iframe {
+  flex: 1;
+  border: none;
+  width: 100%;
+}

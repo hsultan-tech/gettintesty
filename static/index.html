@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scotia iTrade Agent</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            scotia: {
+              red:    '#EC111A',
+              dark:   '#0D0D0F',
+              panel:  '#141416',
+              card:   '#1A1A1F',
+              border: '#2A2A32',
+              muted:  '#3A3A45',
+              text:   '#E2E2E8',
+              sub:    '#8888A0',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-dark: #0D0D0F;
+      --bg-panel: #141416;
+      --bg-card: #1A1A1F;
+      --bg-border: #2A2A32;
+      --bg-muted: #3A3A45;
+      --text-primary: #E2E2E8;
+      --text-secondary: #8888A0;
+      --text-suggestion: #A0A0B8;
+      --accent: #EC111A;
+      --accent-dark: #c40e15;
+      --code-bg: #0D0D0F;
+    }
+    html.light {
+      --bg-dark: #F5F5F7;
+      --bg-panel: #FFFFFF;
+      --bg-card: #F0F0F3;
+      --bg-border: #D8D8E0;
+      --bg-muted: #B0B0BE;
+      --text-primary: #1A1A2E;
+      --text-secondary: #5A5A72;
+      --text-suggestion: #5A5A72;
+      --accent: #EC111A;
+      --accent-dark: #c40e15;
+      --code-bg: #E8E8EC;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg-dark); transition: background 0.3s, color 0.3s; }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--bg-muted); border-radius: 4px; }
+
+    .chat-bubble-user {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+      border-radius: 18px 18px 4px 18px;
+    }
+    .chat-bubble-ai {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-border);
+      border-radius: 18px 18px 18px 4px;
+    }
+
+    .typing-dot {
+      width: 7px; height: 7px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: inline-block;
+      animation: bounce 1.2s infinite ease-in-out;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+      40%            { transform: translateY(-6px); opacity: 1; }
+    }
+
+    .sidebar-item {
+      transition: background 0.15s;
+      cursor: pointer;
+    }
+    .sidebar-item:hover { background: var(--bg-card); }
+    .sidebar-item.active { background: var(--bg-card); border-left: 2px solid var(--accent); }
+
+    textarea:focus { outline: none; }
+
+    .scrape-log {
+      font-family: 'Courier New', monospace;
+      font-size: 0.75rem;
+      line-height: 1.5;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.25s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    #send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .badge-ready { background: rgba(34,197,94,0.15); color: #4ade80; }
+    .badge-empty { background: rgba(236,17,26,0.12); color: #f87171; }
+
+    /* Markdown-like rendering in AI bubbles */
+    .ai-content p { margin: 0 0 0.5em; }
+    .ai-content ul { margin: 0.25em 0 0.5em 1.2em; list-style: disc; }
+    .ai-content ol { margin: 0.25em 0 0.5em 1.2em; list-style: decimal; }
+    .ai-content li { margin-bottom: 0.15em; }
+    .ai-content strong { color: var(--text-primary); font-weight: 600; }
+    .ai-content code {
+      background: var(--code-bg);
+      border: 1px solid var(--bg-border);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: 0.85em;
+    }
+    .ai-content h1, .ai-content h2, .ai-content h3 {
+      font-weight: 600;
+      margin: 0.6em 0 0.3em;
+      color: var(--text-primary);
+    }
+
+    /* Response title labels */
+    .response-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .response-title.curiosity { color: var(--text-secondary); }
+    .response-title.flowtia { color: #7C3AED; }
+    .response-title .title-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .response-title.curiosity .title-dot { background: var(--text-secondary); }
+    .response-title.flowtia .title-dot { background: #7C3AED; }
+
+    /* Inline flowchart card embedded in chat */
+    .flowtia-inline-card {
+      width: 100%;
+      height: 380px;
+      border-radius: 12px;
+      border: 1px solid var(--bg-border);
+      background: var(--bg-panel);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      margin-top: 8px;
+    }
+    .flowtia-inline-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--bg-border);
+      flex-shrink: 0;
+    }
+    .flowtia-inline-body {
+      flex: 1;
+      position: relative;
+    }
+    .flowtia-inline-body iframe {
+      width: 100%; height: 100%; border: none;
+    }
+
+    /* Floating pop-out flowchart panel */
+    .flow-panel {
+      position: fixed;
+      z-index: 60;
+      background: var(--bg-panel);
+      border: 1px solid var(--bg-border);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+      transition: box-shadow 0.2s;
+    }
+    .flow-panel.fullscreen {
+      top: 0; left: 0; right: 0; bottom: 0;
+      border-radius: 0;
+    }
+    .flow-panel.popout {
+      width: 520px;
+      height: 420px;
+      bottom: 24px;
+      right: 24px;
+      resize: both;
+      min-width: 340px;
+      min-height: 280px;
+    }
+    .flow-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--bg-border);
+      cursor: grab;
+      user-select: none;
+      flex-shrink: 0;
+    }
+    .flow-panel-header:active { cursor: grabbing; }
+    .flow-panel-body {
+      flex: 1;
+      position: relative;
+    }
+    .flow-panel-body iframe {
+      width: 100%; height: 100%; border: none;
+    }
+    .flow-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px; height: 28px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .flow-btn:hover { background: var(--bg-border); color: var(--text-primary); }
+  </style>
+</head>
+<body class="font-sans h-screen flex overflow-hidden" style="background:var(--bg-dark); color:var(--text-primary);">
+
+<!-- ───────── SIDEBAR ───────── -->
+<aside id="sidebar" class="w-64 flex-shrink-0 flex flex-col border-r" style="background:var(--bg-panel); border-color:var(--bg-border);">
+
+  <!-- Logo -->
+  <div class="flex items-center gap-3 px-5 py-5 border-b" style="border-color:var(--bg-border);">
+    <img src="/static/images/scotiabank_logo.jpeg" alt="Scotia iTrade" class="w-8 h-8 rounded flex-shrink-0" />
+    <div>
+      <div class="text-sm font-semibold leading-none" style="color:var(--text-primary);">Scotia iTrade</div>
+      <div class="text-xs mt-0.5" style="color:var(--text-secondary);">Domain Expert</div>
+    </div>
+  </div>
+
+  <!-- New Chat -->
+  <div class="px-3 pt-4 pb-2">
+    <button onclick="newChat()" class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 hover:opacity-90"
+      style="background:rgba(236,17,26,0.12); color:var(--accent); border:1px solid rgba(236,17,26,0.2);">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      New Chat
+    </button>
+  </div>
+
+  <!-- Chat history -->
+  <div class="px-3 mb-1">
+    <div class="text-xs font-medium px-2 py-1.5 uppercase tracking-wider" style="color:var(--text-secondary);">Recent</div>
+  </div>
+  <div id="history-list" class="flex-1 overflow-y-auto px-3 space-y-0.5">
+    <!-- populated by JS -->
+  </div>
+
+</aside>
+
+<!-- ───────── MAIN CHAT ───────── -->
+<main class="flex-1 flex flex-col min-w-0" style="background:var(--bg-dark);">
+
+  <!-- Header -->
+  <header class="flex items-center justify-between px-6 py-4 border-b flex-shrink-0" style="background:var(--bg-dark); border-color:var(--bg-border);">
+    <div class="flex items-center gap-3">
+      <div id="chat-title" class="text-base font-semibold" style="color:var(--text-primary);">Scotia iTrade Assistant</div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" class="p-2 rounded-lg transition" style="color:var(--text-secondary);">
+        <svg id="theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg id="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+      <button onclick="clearChat()" title="Clear chat" class="p-2 rounded-lg transition" style="color:var(--text-secondary);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+          <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Messages -->
+  <div id="messages" class="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+    <!-- Welcome state -->
+    <div id="welcome" class="flex flex-col items-center justify-center h-full py-16 fade-in">
+      <img src="/static/images/scotiabank_logo.jpeg" alt="Scotia iTrade" class="w-16 h-16 rounded-2xl mb-5" />
+      <h2 class="text-xl font-semibold mb-2" style="color:var(--text-primary);">Scotia iTrade Expert</h2>
+      <p class="text-sm text-center max-w-xs mb-8" style="color:var(--text-secondary);">Ask me anything about Scotia iTrade - accounts, platforms, pricing, trading tools, and more.</p>
+      <div class="grid grid-cols-1 gap-2 w-full max-w-sm">
+        <button onclick="useSuggestion(this)" class="text-left px-4 py-3 rounded-xl text-sm transition-all hover:border-red-500/40"
+          style="background:var(--bg-panel); border:1px solid var(--bg-border); color:var(--text-suggestion);">
+          What account types does Scotia iTrade offer?
+        </button>
+        <button onclick="useSuggestion(this)" class="text-left px-4 py-3 rounded-xl text-sm transition-all hover:border-red-500/40"
+          style="background:var(--bg-panel); border:1px solid var(--bg-border); color:var(--text-suggestion);">
+          What are the commission fees for stock trading?
+        </button>
+        <button onclick="useSuggestion(this)" class="text-left px-4 py-3 rounded-xl text-sm transition-all hover:border-red-500/40"
+          style="background:var(--bg-panel); border:1px solid var(--bg-border); color:var(--text-suggestion);">
+          How do I set up options trading on iTrade?
+        </button>
+        <button onclick="useSuggestion(this)" class="text-left px-4 py-3 rounded-xl text-sm transition-all hover:border-red-500/40"
+          style="background:var(--bg-panel); border:1px solid var(--bg-border); color:var(--text-suggestion);">
+          What research tools are available on the platform?
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input bar -->
+  <div class="px-6 pb-5 flex-shrink-0">
+    <div class="flex items-end gap-3 p-3 rounded-2xl" style="background:var(--bg-panel); border:1px solid var(--bg-border);">
+      <textarea id="input"
+        rows="1"
+        placeholder="Ask about Scotia iTrade..."
+        class="flex-1 resize-none bg-transparent text-sm leading-relaxed"
+        style="color:var(--text-primary); max-height:140px; min-height:24px;"
+        onkeydown="handleKey(event)"
+        oninput="autoResize(this)"></textarea>
+      <button id="send-btn" onclick="sendMessage()"
+        class="w-9 h-9 flex-shrink-0 rounded-xl flex items-center justify-center transition-all"
+        style="background:var(--accent);">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+    <p class="text-center text-xs mt-2" style="color:var(--bg-muted);">Responses are based on scraped Scotia iTrade content. Always verify with official sources.</p>
+  </div>
+</main>
+
+<!-- ───────── FLOWCHART PANEL (pop-out / fullscreen) ───────── -->
+<div id="flow-panel" class="flow-panel popout" style="display:none;">
+  <div class="flow-panel-header" id="flow-panel-header">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+      </svg>
+      <span style="font-size:12px; font-weight:600; color:var(--text-primary);">Flowtia</span>
+      <span style="font-size:11px; color:var(--text-secondary);" id="flow-panel-subtitle"></span>
+    </div>
+    <div style="display:flex; align-items:center; gap:4px;">
+      <button class="flow-btn" onclick="toggleFlowFullscreen()" title="Toggle fullscreen">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+        </svg>
+      </button>
+      <button class="flow-btn" onclick="closeFlowPanel()" title="Close">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+  <div class="flow-panel-body">
+    <iframe id="flow-iframe" src="about:blank"></iframe>
+  </div>
+</div>
+
+<!-- ───────── SCRAPE MODAL ───────── -->
+<div id="scrape-modal" class="fixed inset-0 z-50 hidden items-center justify-center" style="background:rgba(0,0,0,0.7);">
+  <div class="rounded-2xl w-full max-w-lg mx-4 p-6 flex flex-col gap-4" style="background:var(--bg-panel); border:1px solid var(--bg-border);">
+    <div class="flex items-center justify-between">
+      <h3 class="font-semibold" style="color:var(--text-primary);">Scrape Scotia iTrade</h3>
+      <button onclick="closeScrapeModal()" style="color:var(--text-secondary);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <p class="text-sm" style="color:var(--text-secondary);">This will crawl <span class="font-medium" style="color:var(--text-primary);">scotiaitrade.com</span> using Firecrawl and index the content into the knowledge base. This may take a few minutes.</p>
+    <div id="scrape-log-container" class="hidden rounded-xl p-4 scrape-log text-green-400 overflow-y-auto" style="background:var(--bg-dark); border:1px solid var(--bg-border); max-height:220px;">
+      <div id="scrape-log"></div>
+    </div>
+    <div class="flex gap-3">
+      <button id="start-scrape-btn" onclick="startScrape()"
+        class="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all"
+        style="background:var(--accent); color:white;">
+        Start Scraping
+      </button>
+      <button onclick="closeScrapeModal()"
+        class="px-5 py-2.5 rounded-xl text-sm font-medium"
+        style="background:var(--bg-card); border:1px solid var(--bg-border); color:var(--text-secondary);">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ─── State ───────────────────────────────────────────────
+  let chatHistory = [];
+  let sessions = [];
+  let currentSessionId = null;
+  let isStreaming = false;
+
+  // ─── Init ─────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    checkStatus();
+    setInterval(checkStatus, 30000);
+    initTheme();
+  });
+
+  async function checkStatus() {
+    try {
+      const r = await fetch('/status');
+      const d = await r.json();
+      const badge = document.getElementById('kb-badge');
+      const dot   = document.getElementById('kb-dot');
+      const count = document.getElementById('kb-count');
+      if (!badge || !dot || !count) return;
+      count.textContent = d.doc_count + ' docs';
+      if (d.ready) {
+        badge.className = 'flex items-center justify-between px-3 py-2 rounded-lg badge-ready text-xs font-medium';
+        dot.className   = 'w-1.5 h-1.5 rounded-full bg-green-400 inline-block';
+      } else {
+        badge.className = 'flex items-center justify-between px-3 py-2 rounded-lg badge-empty text-xs font-medium';
+        dot.className   = 'w-1.5 h-1.5 rounded-full bg-red-400 inline-block';
+      }
+    } catch(e) {}
+  }
+
+  // ─── Chat logic ───────────────────────────────────────────
+  function newChat() {
+    if (chatHistory.length > 0) {
+      const title = chatHistory.find(m => m.role === 'user')?.content?.slice(0, 38) || 'Chat';
+      sessions.unshift({ id: Date.now(), title, history: chatHistory });
+      if (sessions.length > 20) sessions.pop();
+      renderHistory();
+    }
+    chatHistory = [];
+    currentSessionId = null;
+    document.getElementById('messages').innerHTML = getWelcomeHTML();
+    document.getElementById('chat-title').textContent = 'Scotia iTrade Assistant';
+  }
+
+  function loadSession(id) {
+    const s = sessions.find(x => x.id === id);
+    if (!s) return;
+    if (chatHistory.length > 0 && currentSessionId !== id) {
+      const title = chatHistory.find(m => m.role === 'user')?.content?.slice(0, 38) || 'Chat';
+      const existing = sessions.find(x => x.id === currentSessionId);
+      if (!existing) sessions.unshift({ id: Date.now(), title, history: chatHistory });
+    }
+    chatHistory = [...s.history];
+    currentSessionId = id;
+    const container = document.getElementById('messages');
+    container.innerHTML = '';
+    chatHistory.forEach(m => {
+      if (m.role === 'user') appendMessage('user', m.content, false);
+      else appendMessage('ai', m.content, false);
+    });
+    document.getElementById('chat-title').textContent = s.title;
+    renderHistory();
+  }
+
+  function renderHistory() {
+    const list = document.getElementById('history-list');
+    if (sessions.length === 0) {
+      list.innerHTML = '<div class="px-2 py-3 text-xs" style="color:var(--text-secondary);">No previous chats</div>';
+      return;
+    }
+    list.innerHTML = sessions.slice(0, 15).map(s => `
+      <div class="sidebar-item px-3 py-2 rounded-lg ${s.id === currentSessionId ? 'active' : ''}" onclick="loadSession(${s.id})">
+        <div class="text-xs font-medium truncate" style="color:var(--text-primary);">${escHtml(s.title)}</div>
+      </div>
+    `).join('');
+  }
+
+  // ─── Tag parsing helpers ──────────────────────────────────────
+  function parseMetaTags(text) {
+    let title = null, flowtia = null, clean = text;
+    const titleMatch = clean.match(/^\[TITLE:(.*?)\]\s*/);
+    if (titleMatch) { title = titleMatch[1]; clean = clean.slice(titleMatch[0].length); }
+    const flowtiaMatch = clean.match(/^\[FLOWTIA:(.*?)\]\s*/);
+    if (flowtiaMatch) { flowtia = flowtiaMatch[1]; clean = clean.slice(flowtiaMatch[0].length); }
+    if (flowtia === 'none') flowtia = null;
+    return { title, flowtia, clean };
+  }
+
+  // Keyword fallback for Flowtia detection
+  const FLOWTIA_KEYWORDS = [
+    'onboarding', 'account opening', 'account open', 'kyc', 'aml', 'compliance',
+    'itrade flow', 'trading flow', 'settlement', 'neo platform', 'wealth one',
+    'wealthone', 'broadridge', 'empower', 'party master', 'mcleod', 'pic ',
+    'charles river', 'oms', 'ftuf', 'first time user', 'operations team',
+    'approval process', 'document review', 'nigo', 'residency check',
+    'options assessment', 'credit bureau', 'batch processing', 'overnight batch',
+    'identity verification', 'starburst', 'orion', 'icon application'
+  ];
+
+  const FLOWTIA_KEYWORD_MAP = {
+    'itrade onboard': 'component-itrade', 'account opening': 'component-itrade',
+    'itrade flow': 'component-itrade', 'icon application': 'component-itrade',
+    'residency check': 'component-itrade', 'options assessment': 'component-itrade',
+    'mcleod': 'component-mcleod', 'advisory flow': 'component-mcleod',
+    'pic ': 'component-pic', 'sjf': 'component-pic',
+    'aml': 'container-compliance', 'compliance': 'container-compliance',
+    'identity verification': 'container-compliance', 'credit bureau': 'container-compliance',
+    'kyc': 'container-data', 'broadridge': 'container-data', 'empower': 'container-data',
+    'party master': 'container-data',
+    'operations team': 'container-operations', 'approval process': 'container-operations',
+    'document review': 'container-operations', 'nigo': 'container-operations',
+    'neo platform': 'component-neo', 'orion': 'container-client-experience',
+    'starburst': 'container-client-experience',
+    'trading flow': 'container-trading', 'settlement': 'component-settlement',
+    'charles river': 'component-charles-river', 'oms': 'component-wealth-oms',
+    'onboarding': 'context', 'first time user': 'component-neo-onboarding',
+    'ftuf': 'component-neo-onboarding', 'batch processing': 'container-compliance',
+    'overnight batch': 'container-compliance',
+  };
+
+  function keywordFallbackFlowtia(text) {
+    const lower = text.toLowerCase();
+    for (const [kw, viewId] of Object.entries(FLOWTIA_KEYWORD_MAP)) {
+      if (lower.includes(kw)) return viewId;
+    }
+    return null;
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById('input');
+    const text  = input.value.trim();
+    if (!text || isStreaming) return;
+
+    hideWelcome();
+    appendMessage('user', text, true);
+    chatHistory.push({ role: 'user', content: text });
+    input.value = '';
+    autoResize(input);
+    setStreaming(true);
+
+    const typingId = showTyping();
+
+    try {
+      const resp = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, history: chatHistory.slice(-10) }),
+      });
+
+      removeTyping(typingId);
+
+      if (!resp.ok) { appendMessage('ai', 'Something went wrong. Please try again.', true); setStreaming(false); return; }
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let fullText = '';
+
+      const msgEl = appendMessage('ai', '', true);
+      const contentEl = msgEl.querySelector('.ai-content');
+      const titleEl = msgEl.querySelector('.response-title');
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        fullText += decoder.decode(value, { stream: true });
+        const parsed = parseMetaTags(fullText);
+        contentEl.innerHTML = renderMarkdown(parsed.clean);
+        // Update title as we stream
+        if (parsed.title && titleEl) {
+          const isFlowtia = parsed.title.toLowerCase() === 'flowtia';
+          titleEl.className = 'response-title ' + (isFlowtia ? 'flowtia' : 'curiosity');
+          titleEl.innerHTML = `<span class="title-dot"></span>${escHtml(parsed.title)}`;
+        }
+        scrollToBottom();
+      }
+
+      const parsed = parseMetaTags(fullText);
+      chatHistory.push({ role: 'assistant', content: fullText });
+
+      // Determine Flowtia view: LLM tag takes priority, keyword fallback second
+      let flowtiaViewId = parsed.flowtia || keywordFallbackFlowtia(text + ' ' + parsed.clean);
+
+      if (flowtiaViewId) {
+        appendFlowtia(msgEl, flowtiaViewId);
+      }
+    } catch(e) {
+      removeTyping(typingId);
+      appendMessage('ai', 'Network error. Please check your connection.', true);
+    }
+
+    setStreaming(false);
+  }
+
+  function appendMessage(role, content, animate) {
+    const container = document.getElementById('messages');
+    const wrap = document.createElement('div');
+    wrap.className = `flex gap-3 ${animate ? 'fade-in' : ''} ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+
+    if (role === 'user') {
+      wrap.innerHTML = `
+        <div class="max-w-xl">
+          <div class="chat-bubble-user px-4 py-3 text-sm text-white leading-relaxed">${escHtml(content)}</div>
+        </div>`;
+    } else {
+      // Parse tags from content if present
+      let displayContent = content;
+      let titleClass = 'curiosity';
+      let titleText = '';
+      if (content) {
+        const parsed = parseMetaTags(content);
+        displayContent = parsed.clean;
+        if (parsed.title) {
+          titleText = parsed.title;
+          titleClass = parsed.title.toLowerCase() === 'flowtia' ? 'flowtia' : 'curiosity';
+        }
+      }
+      wrap.innerHTML = `
+        <div class="flex gap-3 max-w-2xl w-full">
+          <img src="/static/images/scotiabank_logo.jpeg" alt="Scotia iTrade" class="w-7 h-7 rounded-lg flex-shrink-0 mt-0.5" />
+          <div class="flex-1">
+            <div class="response-title ${titleClass}">${titleText ? `<span class="title-dot"></span>${escHtml(titleText)}` : ''}</div>
+            <div class="chat-bubble-ai px-4 py-3 text-sm leading-relaxed ai-content" style="color:var(--text-primary);">${displayContent ? renderMarkdown(displayContent) : ''}</div>
+          </div>
+        </div>`;
+    }
+
+    container.appendChild(wrap);
+    scrollToBottom();
+    return wrap;
+  }
+
+  function showTyping() {
+    const id = 'typing-' + Date.now();
+    const container = document.getElementById('messages');
+    const wrap = document.createElement('div');
+    wrap.id = id;
+    wrap.className = 'flex gap-3 justify-start fade-in';
+    wrap.innerHTML = `
+      <div class="flex gap-3 max-w-2xl">
+        <img src="/static/images/scotiabank_logo.jpeg" alt="Scotia iTrade" class="w-7 h-7 rounded-lg flex-shrink-0 mt-0.5" />
+        <div class="chat-bubble-ai px-4 py-3 flex items-center gap-1.5">
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+        </div>
+      </div>`;
+    container.appendChild(wrap);
+    scrollToBottom();
+    return id;
+  }
+
+  function removeTyping(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  }
+
+  function setStreaming(val) {
+    isStreaming = val;
+    const btn = document.getElementById('send-btn');
+    btn.disabled = val;
+  }
+
+  function hideWelcome() {
+    const w = document.getElementById('welcome');
+    if (w) w.remove();
+  }
+
+  function scrollToBottom() {
+    const m = document.getElementById('messages');
+    m.scrollTop = m.scrollHeight;
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+  }
+
+  function useSuggestion(btn) {
+    document.getElementById('input').value = btn.textContent.trim();
+    sendMessage();
+  }
+
+  function clearChat() {
+    chatHistory = [];
+    document.getElementById('messages').innerHTML = getWelcomeHTML();
+    document.getElementById('chat-title').textContent = 'Scotia iTrade Assistant';
+  }
+
+  // ─── Scrape modal ─────────────────────────────────────────
+  function openScrapeModal() {
+    document.getElementById('scrape-modal').classList.remove('hidden');
+    document.getElementById('scrape-modal').classList.add('flex');
+    document.getElementById('scrape-log').textContent = '';
+    document.getElementById('scrape-log-container').classList.add('hidden');
+    document.getElementById('start-scrape-btn').disabled = false;
+    document.getElementById('start-scrape-btn').textContent = 'Start Scraping';
+  }
+
+  function closeScrapeModal() {
+    document.getElementById('scrape-modal').classList.add('hidden');
+    document.getElementById('scrape-modal').classList.remove('flex');
+  }
+
+  async function startScrape() {
+    const btn = document.getElementById('start-scrape-btn');
+    btn.disabled = true;
+    btn.textContent = 'Scraping...';
+
+    const logContainer = document.getElementById('scrape-log-container');
+    const log = document.getElementById('scrape-log');
+    logContainer.classList.remove('hidden');
+    log.textContent = '';
+
+    try {
+      const resp = await fetch('/scrape', { method: 'POST' });
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        log.textContent += decoder.decode(value, { stream: true });
+        logContainer.scrollTop = logContainer.scrollHeight;
+      }
+
+      btn.textContent = 'Done!';
+      btn.style.background = '#16a34a';
+      checkStatus();
+    } catch(e) {
+      log.textContent += '\n[Error: ' + e.message + ']';
+      btn.disabled = false;
+      btn.textContent = 'Retry';
+    }
+  }
+
+  // ─── Check API Keys ──────────────────────────────────────
+  async function checkKeys() {
+    const btn = document.getElementById('check-keys-btn');
+    const origText = btn.textContent;
+    btn.textContent = 'Checking...';
+    btn.disabled = true;
+
+    try {
+      const resp = await fetch('/check-keys');
+      const data = await resp.json();
+
+      let msg = '';
+      const fc = data.firecrawl || {};
+      const oai = data.openai || {};
+
+      msg += '🔑 Firecrawl: ' + (fc.ok ? '✅ ' + (fc.message || 'OK') : '❌ ' + (fc.error || 'Failed')) + '\n';
+      msg += '🔑 OpenAI: ' + (oai.ok ? '✅ ' + (oai.message || 'OK') : '❌ ' + (oai.error || 'Failed'));
+
+      alert(msg);
+    } catch(e) {
+      alert('Could not reach server: ' + e.message);
+    }
+
+    btn.textContent = origText;
+    btn.disabled = false;
+  }
+
+  // ─── Helpers ──────────────────────────────────────────────
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function renderMarkdown(text) {
+    let html = escHtml(text);
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+    html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+    html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+    html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+    html = html.replace(/^\* (.+)$/gm, '<li>$1</li>');
+    html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+    html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+    html = html.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+    html = html.replace(/\n\n/g, '</p><p>');
+    html = html.replace(/\n/g, '<br>');
+    html = '<p>' + html + '</p>';
+    html = html.replace(/<p><\/p>/g, '');
+    return html;
+  }
+
+  function getWelcomeHTML() {
+    return `<div id="welcome" class="flex flex-col items-center justify-center h-full py-16 fade-in">
+      <img src="/static/images/scotiabank_logo.jpeg" alt="Scotia iTrade" class="w-16 h-16 rounded-2xl mb-5" />
+      <h2 class="text-xl font-semibold mb-2" style="color:var(--text-primary);">Scotia iTrade Expert</h2>
+      <p class="text-sm text-center max-w-xs mb-8" style="color:var(--text-secondary);">Ask me anything about Scotia iTrade - accounts, platforms, pricing, trading tools, and more.</p>
+      <div class="grid grid-cols-1 gap-2 w-full max-w-sm">
+        <button onclick="useSuggestion(this)" class="text-left px-4 py-3 rounded-xl text-sm transition-all hover:border-red-500/40"
+          style="background:var(--bg-panel); border:1px solid var(--bg-border); color:var(--text-suggestion);">
+          What account types does Scotia iTrade offer?
+        </button>
+        <button onclick="useSuggestion(this)" class="text-left px-4 py-3 rounded-xl text-sm transition-all hover:border-red-500/40"
+          style="background:var(--bg-panel); border:1px solid var(--bg-border); color:var(--text-suggestion);">
+          What are the commission fees for stock trading?
+        </button>
+        <button onclick="useSuggestion(this)" class="text-left px-4 py-3 rounded-xl text-sm transition-all hover:border-red-500/40"
+          style="background:var(--bg-panel); border:1px solid var(--bg-border); color:var(--text-suggestion);">
+          How do I set up options trading on iTrade?
+        </button>
+        <button onclick="useSuggestion(this)" class="text-left px-4 py-3 rounded-xl text-sm transition-all hover:border-red-500/40"
+          style="background:var(--bg-panel); border:1px solid var(--bg-border); color:var(--text-suggestion);">
+          What research tools are available on the platform?
+        </button>
+      </div>
+    </div>`;
+  }
+
+  // ─── Theme toggle ──────────────────────────────────────────
+  function initTheme() {
+    const saved = localStorage.getItem('theme') || 'dark';
+    applyTheme(saved);
+  }
+
+  function toggleTheme() {
+    const isLight = document.documentElement.classList.contains('light');
+    applyTheme(isLight ? 'dark' : 'light');
+  }
+
+  function applyTheme(theme) {
+    document.documentElement.classList.toggle('light', theme === 'light');
+    localStorage.setItem('theme', theme);
+    const sun = document.getElementById('theme-icon-sun');
+    const moon = document.getElementById('theme-icon-moon');
+    if (theme === 'light') {
+      sun.style.display = 'none';
+      moon.style.display = 'block';
+    } else {
+      sun.style.display = 'block';
+      moon.style.display = 'none';
+    }
+  }
+
+  // ─── Flowtia CTA ───────────────────────────────────────────
+  function appendFlowtia(msgEl, viewId) {
+    const cta = document.createElement('div');
+    cta.className = 'flex gap-3 justify-start fade-in mt-2';
+    cta.innerHTML = `
+      <div class="flex gap-3 max-w-2xl w-full">
+        <div style="width:28px;flex-shrink:0;"></div>
+        <div class="flex-1">
+          <div style="font-size:13px; color:var(--text-secondary); margin-bottom:6px;">Would you like me to visualize this process for you with <strong style="color:#7C3AED;">Flowtia</strong>?</div>
+          <div style="display:flex; gap:6px;">
+            <button onclick="showInlineFlowtia(this, '${viewId}')" style="background:#7C3AED; color:white; border:none; padding:6px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; transition:opacity 0.15s;"
+              onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">Yes</button>
+            <button onclick="this.closest('.fade-in').remove();" style="background:var(--bg-card); color:var(--text-secondary); border:1px solid var(--bg-border); padding:6px 14px; border-radius:8px; font-size:12px; cursor:pointer; transition:opacity 0.15s;"
+              onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">No thanks</button>
+          </div>
+        </div>
+      </div>`;
+    msgEl.parentNode.insertBefore(cta, msgEl.nextSibling);
+    scrollToBottom();
+  }
+
+  function showInlineFlowtia(btn, viewId) {
+    const ctaEl = btn.closest('.fade-in');
+    const container = document.getElementById('messages');
+
+    // Build inline Flowtia message with embedded flowchart
+    const wrap = document.createElement('div');
+    wrap.className = 'flex gap-3 justify-start fade-in mt-2';
+    const iframeId = 'flowtia-iframe-' + Date.now();
+    wrap.innerHTML = `
+      <div class="flex gap-3 max-w-2xl w-full">
+        <div style="width:28px;flex-shrink:0;display:flex;align-items:flex-start;justify-content:center;padding-top:2px;">
+          <div style="width:24px;height:24px;border-radius:50%;background:#7C3AED;display:flex;align-items:center;justify-content:center;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+            </svg>
+          </div>
+        </div>
+        <div class="flex-1">
+          <div class="response-title flowtia"><span class="title-dot"></span>Flowtia</div>
+          <div class="chat-bubble-ai px-4 py-3 text-sm leading-relaxed" style="color:var(--text-primary);">
+            Sure thing. Here's a process map for this flow.
+          </div>
+          <div class="flowtia-inline-card" id="inline-card-${iframeId}">
+            <div class="flowtia-inline-header">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                </svg>
+                <span style="font-size:11px; font-weight:600; color:var(--text-primary);">Flowtia</span>
+                <span style="font-size:10px; color:var(--text-secondary);">Click and drag to move</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:4px;">
+                <button class="flow-btn" onclick="popoutFromInline('${iframeId}', '${viewId}')" title="Pop out">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                  </svg>
+                </button>
+                <button class="flow-btn" onclick="fullscreenFromInline('${iframeId}', '${viewId}')" title="Fullscreen">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="flowtia-inline-body">
+              <iframe id="${iframeId}" src="${FLOW_URL}?view=${viewId}"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+    // Replace CTA with the inline Flowtia card
+    if (ctaEl && ctaEl.parentNode) {
+      ctaEl.parentNode.insertBefore(wrap, ctaEl);
+      ctaEl.remove();
+    } else {
+      container.appendChild(wrap);
+    }
+    scrollToBottom();
+  }
+
+  // ─── Flowchart panel (pop-out / fullscreen) ─────────────────
+  const FLOW_URL = 'http://localhost:3000';
+  let flowPanelOpen = false;
+  let currentPopoutViewId = null;
+
+  function popoutFromInline(iframeId, viewId) {
+    currentPopoutViewId = viewId;
+    const panel = document.getElementById('flow-panel');
+    const iframe = document.getElementById('flow-iframe');
+    iframe.src = FLOW_URL + '?view=' + viewId;
+    document.getElementById('flow-panel-subtitle').textContent = viewId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    panel.style.display = 'flex';
+    panel.className = 'flow-panel popout';
+    panel.style.top = ''; panel.style.left = '';
+    panel.style.right = '24px'; panel.style.bottom = '24px';
+    flowPanelOpen = true;
+    makeDraggable();
+
+    // Mark the inline card as "Pinned"
+    const card = document.getElementById('inline-card-' + iframeId);
+    if (card) {
+      const body = card.querySelector('.flowtia-inline-body');
+      if (body) {
+        body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-secondary);font-size:13px;font-style:italic;">Pinned</div>';
+      }
+    }
+  }
+
+  function fullscreenFromInline(iframeId, viewId) {
+    currentPopoutViewId = viewId;
+    const panel = document.getElementById('flow-panel');
+    const iframe = document.getElementById('flow-iframe');
+    iframe.src = FLOW_URL + '?view=' + viewId;
+    document.getElementById('flow-panel-subtitle').textContent = viewId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    panel.style.display = 'flex';
+    panel.className = 'flow-panel fullscreen';
+    panel.style.top = '0'; panel.style.left = '0';
+    panel.style.right = '0'; panel.style.bottom = '0';
+    flowPanelOpen = true;
+  }
+
+  function closeFlowPanel() {
+    const panel = document.getElementById('flow-panel');
+    panel.style.display = 'none';
+    flowPanelOpen = false;
+  }
+
+  function toggleFlowFullscreen() {
+    const panel = document.getElementById('flow-panel');
+    if (panel.classList.contains('fullscreen')) {
+      panel.className = 'flow-panel popout';
+      panel.style.top = ''; panel.style.left = '';
+      panel.style.right = '24px'; panel.style.bottom = '24px';
+      makeDraggable();
+    } else {
+      panel.className = 'flow-panel fullscreen';
+      panel.style.top = '0'; panel.style.left = '0';
+      panel.style.right = '0'; panel.style.bottom = '0';
+    }
+  }
+
+  function makeDraggable() {
+    const header = document.getElementById('flow-panel-header');
+    const panel = document.getElementById('flow-panel');
+    let isDragging = false, startX, startY, startLeft, startTop;
+
+    header.onmousedown = (e) => {
+      if (panel.classList.contains('fullscreen')) return;
+      isDragging = true;
+      startX = e.clientX; startY = e.clientY;
+      const rect = panel.getBoundingClientRect();
+      startLeft = rect.left; startTop = rect.top;
+      panel.style.transition = 'none';
+      document.onmousemove = (ev) => {
+        if (!isDragging) return;
+        panel.style.left = (startLeft + ev.clientX - startX) + 'px';
+        panel.style.top = (startTop + ev.clientY - startY) + 'px';
+        panel.style.right = 'auto';
+        panel.style.bottom = 'auto';
+      };
+      document.onmouseup = () => {
+        isDragging = false;
+        panel.style.transition = '';
+        document.onmousemove = null;
+        document.onmouseup = null;
+      };
+    };
+  }
+</script>
+</body>
+</html>

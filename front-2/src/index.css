@@ -1,0 +1,162 @@
+/* ===== Scotia Web Font ===== */
+@font-face {
+  font-family: 'Scotia';
+  src: url('/src/assets/fonts/Scotia_W_Lt.woff2') format('woff2'),
+       url('/src/assets/fonts/Scotia_W_Lt.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Scotia';
+  src: url('/src/assets/fonts/Scotia_W_LtIt.woff2') format('woff2'),
+       url('/src/assets/fonts/Scotia_W_LtIt.woff') format('woff');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Scotia';
+  src: url('/src/assets/fonts/Scotia_W_Rg.woff2') format('woff2'),
+       url('/src/assets/fonts/Scotia_W_Rg.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Scotia';
+  src: url('/src/assets/fonts/Scotia_W_It.woff2') format('woff2'),
+       url('/src/assets/fonts/Scotia_W_It.woff') format('woff');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Scotia';
+  src: url('/src/assets/fonts/Scotia_W_Bd.woff2') format('woff2'),
+       url('/src/assets/fonts/Scotia_W_Bd.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Scotia';
+  src: url('/src/assets/fonts/Scotia_W_BdIt.woff2') format('woff2'),
+       url('/src/assets/fonts/Scotia_W_BdIt.woff') format('woff');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ScotiaHeadline';
+  src: url('/src/assets/fonts/Scotia_W_Headline.woff2') format('woff2'),
+       url('/src/assets/fonts/Scotia_W_Headline.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ScotiaLegal';
+  src: url('/src/assets/fonts/Scotia_W_Legal.woff2') format('woff2'),
+       url('/src/assets/fonts/Scotia_W_Legal.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* Typography Scale */
+  --font-family-base: 'Scotia', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-headline: 'ScotiaHeadline', 'Scotia', sans-serif;
+  --font-family-legal: 'ScotiaLegal', 'Scotia', sans-serif;
+  --font-family-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Courier New', monospace;
+  
+  /* Font Sizes - 1rem = 16px base */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* Line Heights */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  
+  /* Colors — light defaults */
+  --color-text-primary: #1a202c;
+  --color-text-secondary: #4a5568;
+  --color-text-tertiary: #718096;
+  --color-primary: #EC111A;
+  --color-primary-hover: #c40e15;
+  --color-accent: #00B2E3;
+  --color-accent-hover: #009ec9;
+  --color-border: #e2e8f0;
+  --color-surface: #ffffff;
+  --color-bg: #F4F4F6;
+  --color-input-bg: #ffffff;
+  --color-active-item: #EEF2FF;
+  --sidebar-width: 252px;
+
+  font-family: var(--font-family-base);
+  line-height: var(--line-height-normal);
+  font-weight: var(--font-weight-normal);
+  font-size: 16px;
+  
+  color-scheme: light;
+  color: var(--color-text-primary);
+  background-color: var(--color-surface);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --color-text-primary: #e8e8ed;
+  --color-text-secondary: #a0a0ab;
+  --color-text-tertiary: #6b7280;
+  --color-border: #2a2a2e;
+  --color-surface: #1e1e20;
+  --color-bg: #141414;
+  --color-input-bg: #1e1e20;
+  --color-active-item: #2a1c1e;
+  background-color: var(--color-bg);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: var(--color-bg);
+  transition: background-color 0.25s, color 0.25s;
+}
+
+#root {
+  width: 100%;
+  height: 100vh;
+}

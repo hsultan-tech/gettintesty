@@ -1,0 +1,8 @@
+.venv
+.env/
+_agent.py
+_orchestrator.py
+scotia_tfsa_crawl.zip
+urls.json
+webcrawl.py
+map.py
